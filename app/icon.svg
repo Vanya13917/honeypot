@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- cauldron body -->
+  <path d="M7 14 Q6 24 16 26 Q26 24 25 14 Z"/>
+  <!-- rim -->
+  <line x1="5" y1="14" x2="27" y2="14"/>
+  <!-- left handle -->
+  <path d="M7 14 Q4 12 5 9"/>
+  <!-- right handle -->
+  <path d="M25 14 Q28 12 27 9"/>
+  <!-- steam lines -->
+  <path d="M12 10 Q11 7 12 4"/>
+  <path d="M16 9 Q15 6 16 3"/>
+  <path d="M20 10 Q19 7 20 4"/>
+</svg>
