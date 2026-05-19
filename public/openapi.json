@@ -1,0 +1,249 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "honeypot",
+    "version": "0.2.0",
+    "description": "Multi-chain token honeypot and security checker for AI agents. Detects honeypots, taxes, owner privileges, blacklist functions, and contract vulnerabilities across 8+ EVM chains via GoPlus Security API.",
+    "x-guidance": "Call GET /api/check?token=0x...&chain=1 ($0.02) for basic honeypot analysis. Use /api/check/deep ($0.04) for LP analysis + top holders + creator info. Use /api/check/batch?tokens=0x...,0x... ($0.01/token, up to 20) for bulk checks. Use /api/wallet-risk?address=0x... ($0.02) for address risk scoring. Use /api/lp ($0.02) for LP details. All paid endpoints use Tempo MPP x402. Agents only need USDC.e — gas-abstracted via feePayer. chain param accepts chainId (1,56,137,43114,42161,10,8453,250) or name (ethereum,bsc,polygon,avalanche,arbitrum,optimism,base,fantom)."
+  },
+  "servers": [{ "url": "https://honeypot.ivan-tempo.xyz" }],
+  "x-service-info": {
+    "categories": ["security", "defi", "blockchain"],
+    "docs": {
+      "homepage": "https://honeypot.ivan-tempo.xyz",
+      "apiReference": "https://honeypot.ivan-tempo.xyz/openapi.json"
+    }
+  },
+  "paths": {
+    "/api/check": {
+      "get": {
+        "operationId": "checkToken",
+        "summary": "Basic honeypot check",
+        "description": "Returns isHoneypot, buy/sellTax, isOpenSource, isProxy, isMintable, ownerCanChangeBalance, hasBlacklist, antiWhale, transferPausable. Results cached 5 minutes per (token, chain).",
+        "parameters": [
+          { "name": "token", "in": "query", "required": true,  "schema": { "type": "string" }, "example": "0xdac17f958d2ee523a2206206994597c13d831ec7", "description": "Token contract address (0x prefixed)" },
+          { "name": "chain", "in": "query", "required": false, "schema": { "type": "string", "default": "1" }, "description": "Chain ID or name: 1/ethereum, 56/bsc, 137/polygon, 43114/avalanche, 42161/arbitrum, 10/optimism, 8453/base, 250/fantom" }
+        ],
+        "x-payment-info": {
+          "authMode": "paid",
+          "protocols": ["x402"],
+          "price": "0.02",
+          "currency": "USDC.e",
+          "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "network": "tempo",
+          "chainId": 4217,
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "feePayer": true,
+          "gasAbstracted": true
+        },
+        "x-mpp": {
+          "price": 20000,
+          "token": "USDC.e",
+          "tokenAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "network": "tempo",
+          "feePayer": true
+        },
+        "responses": {
+          "200": {
+            "description": "Token security analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "chain": { "type": "string" },
+                    "chainId": { "type": "number" },
+                    "isHoneypot": { "type": "boolean" },
+                    "buyTax": { "type": ["number", "null"] },
+                    "sellTax": { "type": ["number", "null"] },
+                    "isOpenSource": { "type": "boolean" },
+                    "isProxy": { "type": "boolean" },
+                    "isMintable": { "type": "boolean" },
+                    "ownerCanChangeBalance": { "type": "boolean" },
+                    "hasBlacklist": { "type": "boolean" },
+                    "antiWhale": { "type": "boolean" },
+                    "transferPausable": { "type": "boolean" },
+                    "tokenName": { "type": "string" },
+                    "tokenSymbol": { "type": "string" },
+                    "holderCount": { "type": ["number", "null"] },
+                    "totalSupply": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "402": { "description": "Payment required — attach x402 header with USDC.e." }
+        }
+      }
+    },
+    "/api/check/deep": {
+      "get": {
+        "operationId": "checkTokenDeep",
+        "summary": "Deep honeypot + LP analysis",
+        "description": "All basic fields plus LP analysis (lockedPercent, dex list, lp_holders), top 10 token holders, creator/owner info, cannotSellAll, tradingCooldown, hiddenOwner. Results cached 5 minutes.",
+        "parameters": [
+          { "name": "token", "in": "query", "required": true,  "schema": { "type": "string" }, "description": "Token contract address" },
+          { "name": "chain", "in": "query", "required": false, "schema": { "type": "string", "default": "1" }, "description": "Chain ID or name" }
+        ],
+        "x-payment-info": {
+          "authMode": "paid",
+          "protocols": ["x402"],
+          "price": "0.04",
+          "currency": "USDC.e",
+          "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "network": "tempo",
+          "chainId": 4217,
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "feePayer": true,
+          "gasAbstracted": true
+        },
+        "x-mpp": {
+          "price": 40000,
+          "token": "USDC.e",
+          "tokenAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "network": "tempo",
+          "feePayer": true
+        },
+        "responses": {
+          "200": { "description": "Deep token security + LP analysis" },
+          "402": { "description": "Payment required." }
+        }
+      }
+    },
+    "/api/check/batch": {
+      "get": {
+        "operationId": "checkTokenBatch",
+        "summary": "Batch honeypot check (up to 20 tokens)",
+        "description": "Basic check for multiple tokens in one request. Price = N × $0.01 where N is token count (max 20). Results cached 5 minutes per token.",
+        "parameters": [
+          { "name": "tokens", "in": "query", "required": true,  "schema": { "type": "string" }, "example": "0xdac17f...,0xa0b869...", "description": "Comma-separated token addresses (max 20)" },
+          { "name": "chain",  "in": "query", "required": false, "schema": { "type": "string", "default": "1" }, "description": "Chain ID or name (all tokens checked on same chain)" }
+        ],
+        "x-payment-info": {
+          "authMode": "paid",
+          "protocols": ["x402"],
+          "price": "0.01",
+          "currency": "USDC.e",
+          "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "network": "tempo",
+          "chainId": 4217,
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "feePayer": true,
+          "gasAbstracted": true,
+          "note": "Price is dynamic: N tokens × $0.01. Min $0.01 for 1 token, max $0.20 for 20 tokens."
+        },
+        "x-mpp": {
+          "price": 10000,
+          "token": "USDC.e",
+          "tokenAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "network": "tempo",
+          "feePayer": true
+        },
+        "responses": {
+          "200": { "description": "Array of basic security results" },
+          "402": { "description": "Payment required." }
+        }
+      }
+    },
+    "/api/wallet-risk": {
+      "get": {
+        "operationId": "checkWalletRisk",
+        "summary": "Wallet / address risk scoring",
+        "description": "GoPlus address_security check: cybercrime, money_laundering, sanctioned, phishing, blackmail flags. Returns riskScore 0–100 and riskLevel (clean/low/medium/high). Results cached 5 minutes.",
+        "parameters": [
+          { "name": "address", "in": "query", "required": true,  "schema": { "type": "string" }, "description": "Wallet address to check" },
+          { "name": "chain",   "in": "query", "required": false, "schema": { "type": "string", "default": "1" }, "description": "Chain ID or name" }
+        ],
+        "x-payment-info": {
+          "authMode": "paid",
+          "protocols": ["x402"],
+          "price": "0.02",
+          "currency": "USDC.e",
+          "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "network": "tempo",
+          "chainId": 4217,
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "feePayer": true,
+          "gasAbstracted": true
+        },
+        "x-mpp": {
+          "price": 20000,
+          "token": "USDC.e",
+          "tokenAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "network": "tempo",
+          "feePayer": true
+        },
+        "responses": {
+          "200": {
+            "description": "Address risk assessment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "address": { "type": "string" },
+                    "chain": { "type": "string" },
+                    "riskScore": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "riskLevel": { "type": "string", "enum": ["clean", "low", "medium", "high"] },
+                    "flags": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "402": { "description": "Payment required." }
+        }
+      }
+    },
+    "/api/lp": {
+      "get": {
+        "operationId": "getLpDetails",
+        "summary": "Liquidity pool details",
+        "description": "Returns dex list, pair addresses, liquidity amounts, LP holders, and locked LP percentage. Results cached 5 minutes.",
+        "parameters": [
+          { "name": "token", "in": "query", "required": true,  "schema": { "type": "string" }, "description": "Token contract address" },
+          { "name": "chain", "in": "query", "required": false, "schema": { "type": "string", "default": "1" }, "description": "Chain ID or name" }
+        ],
+        "x-payment-info": {
+          "authMode": "paid",
+          "protocols": ["x402"],
+          "price": "0.02",
+          "currency": "USDC.e",
+          "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "network": "tempo",
+          "chainId": 4217,
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "feePayer": true,
+          "gasAbstracted": true
+        },
+        "x-mpp": {
+          "price": 20000,
+          "token": "USDC.e",
+          "tokenAddress": "0x20C000000000000000000000b9537d11c60E8b50",
+          "recipient": "0x0d509f743bc6fc907d5f63d8b0dae1fca8d80897",
+          "network": "tempo",
+          "feePayer": true
+        },
+        "responses": {
+          "200": { "description": "LP details for the token" },
+          "402": { "description": "Payment required." }
+        }
+      }
+    },
+    "/api/info": {
+      "get": {
+        "operationId": "getServiceInfo",
+        "summary": "Service metadata",
+        "description": "Returns service info, payment details, chain list, and endpoint summary. Free, no payment required.",
+        "responses": {
+          "200": { "description": "Service metadata" }
+        }
+      }
+    }
+  }
+}
