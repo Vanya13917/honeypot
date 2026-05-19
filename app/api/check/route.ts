@@ -7,9 +7,18 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function GET(request: Request): Promise<Response> {
+  console.log('[DEBUG] check route called', { headers: Object.fromEntries(request.headers), url: request.url })
+
   // Payment FIRST — MPPScan probes this without params and expects 402
   const result = await mppx.charge({ amount: PRICES.basic })(request)
-  if (result.status === 402) return result.challenge
+
+  console.log('[DEBUG] charge result', { status: result?.status })
+  if (result.status === 402) {
+    const clone = result.challenge.clone()
+    const body = await clone.text()
+    console.log('[DEBUG] verification failed body', body)
+    return result.challenge
+  }
 
   const url = new URL(request.url)
   const token = url.searchParams.get("token")?.toLowerCase()
