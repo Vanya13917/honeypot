@@ -7,12 +7,12 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function GET(request: Request): Promise<Response> {
-  const result = await mppx.charge({ amount: PRICES.walletRisk })(request)
-  if (result.status === 402) return result.challenge
-
   const url = new URL(request.url)
   const address = url.searchParams.get("address")?.toLowerCase()
   const chainParam = url.searchParams.get("chain") || "1"
+
+  const result = await mppx.charge({ amount: PRICES.walletRisk })(request)
+  if (result.status === 402) return result.challenge
 
   if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
     return result.withReceipt(NextResponse.json({ error: "invalid_address" }, { status: 400 }))

@@ -234,16 +234,6 @@
           "402": { "description": "Payment required." }
         }
       }
-    },
-    "/api/info": {
-      "get": {
-        "operationId": "getServiceInfo",
-        "summary": "Service metadata",
-        "description": "Returns service info, payment details, chain list, and endpoint summary. Free, no payment required.",
-        "responses": {
-          "200": { "description": "Service metadata" }
-        }
-      }
     }
   }
 }

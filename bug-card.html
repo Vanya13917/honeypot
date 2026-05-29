@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1600">
+<title>Tempo keychain precompile bug</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1600px;
+    height: 900px;
+    overflow: hidden;
+    background: #090909;
+    color: #cccccc;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 100px;
+    gap: 0;
+  }
+
+  .header {
+    margin-bottom: 52px;
+  }
+
+  h1 {
+    font-size: 52px;
+    font-weight: 700;
+    color: #efefef;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 22px;
+    color: #7a7a7a;
+    letter-spacing: 0.2px;
+  }
+
+  .blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .block {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    min-width: 62px;
+    text-align: center;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .label-error {
+    background: rgba(248, 113, 113, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+  }
+
+  .label-why {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.25);
+  }
+
+  .label-fix {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.25);
+  }
+
+  .content {
+    flex: 1;
+  }
+
+  .error-block {
+    background: rgba(248, 113, 113, 0.06);
+    border: 1px solid rgba(248, 113, 113, 0.18);
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #f87171;
+  }
+
+  .error-block .dim {
+    color: rgba(248, 113, 113, 0.55);
+  }
+
+  .list-block {
+    font-size: 16px;
+    line-height: 1.85;
+    color: #7a7a7a;
+  }
+
+  .list-block li {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .list-block li::before {
+    content: "—  ";
+    color: #3a3a3a;
+  }
+
+  .list-block .hi {
+    color: #cccccc;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: #1a1a1a;
+    margin: 6px 0 36px 0;
+  }
+
+  footer {
+    margin-top: 44px;
+    font-size: 13px;
+    color: #3a3a3a;
+    letter-spacing: 0.3px;
+  }
+
+  footer span {
+    color: #555555;
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Tempo keychain precompile bug</h1>
+    <div class="subtitle">MPP services fail for passkey wallets</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="blocks">
+
+    <div class="block">
+      <div class="label label-error">ERROR</div>
+      <div class="content">
+        <div class="error-block">
+          mppx: internal verification error<br>
+          <span class="dim">Details:</span> keychain precompile error:<br>
+          &nbsp;&nbsp;Account keychain error: <strong>KeyAlreadyExists</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label label-why">WHY</div>
+      <div class="content">
+        <ul class="list-block">
+          <li>passkey wallets include <span class="hi">keyAuthorization</span> in every tx</li>
+          <li>Tempo precompile rejects re-submission as <span class="hi">KeyAlreadyExists</span></li>
+          <li>field is in signed payload → <span class="hi">cannot strip server-side</span></li>
+          <li>payment fails before it reaches the chain</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label label-fix">FIX</div>
+      <div class="content">
+        <ul class="list-block">
+          <li>make precompile <span class="hi">idempotent</span> (no-op on existing key)</li>
+          <li>OR wallet SDK skips <span class="hi">keyAuthorization</span> once key is registered</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>issue: <span>github.com/tempoxyz/mpp/issues/657</span></footer>
+
+</body>
+</html>

@@ -9,12 +9,12 @@ export const dynamic = "force-dynamic"
 type HolderRaw = Record<string, unknown>
 
 export async function GET(request: Request): Promise<Response> {
-  const result = await mppx.charge({ amount: PRICES.deep })(request)
-  if (result.status === 402) return result.challenge
-
   const url = new URL(request.url)
   const token = url.searchParams.get("token")?.toLowerCase()
   const chainParam = url.searchParams.get("chain") || "1"
+
+  const result = await mppx.charge({ amount: PRICES.deep })(request)
+  if (result.status === 402) return result.challenge
 
   if (!token || !/^0x[a-fA-F0-9]{40}$/.test(token)) {
     return result.withReceipt(NextResponse.json({ error: "invalid_token" }, { status: 400 }))

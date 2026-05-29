@@ -7,9 +7,6 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function GET(request: Request): Promise<Response> {
-  console.log('[DEBUG] batch route called', { headers: Object.fromEntries(request.headers), url: request.url })
-
-  // Parse token count first to compute dynamic price, then charge
   const url = new URL(request.url)
   const tokensParam = url.searchParams.get("tokens") || ""
   const rawTokens = tokensParam.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean)
@@ -18,14 +15,7 @@ export async function GET(request: Request): Promise<Response> {
   const price = (count * Number(PRICES.batch)).toFixed(2)
 
   const result = await mppx.charge({ amount: price })(request)
-
-  console.log('[DEBUG] batch charge result', { status: result?.status })
-  if (result.status === 402) {
-    const clone = result.challenge.clone()
-    const body = await clone.text()
-    console.log('[DEBUG] batch verification failed body', body)
-    return result.challenge
-  }
+  if (result.status === 402) return result.challenge
 
   const chainParam = url.searchParams.get("chain") || "1"
   const chainId = CHAIN_IDS[chainParam.toLowerCase()] || chainParam
