@@ -26,7 +26,7 @@
         ],
         "x-payment-info": {
           "authMode": "paid",
-          "protocols": ["x402"],
+          "protocols": ["mpp"],
           "price": "0.02",
           "currency": "USDC.e",
           "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
@@ -89,7 +89,7 @@
         ],
         "x-payment-info": {
           "authMode": "paid",
-          "protocols": ["x402"],
+          "protocols": ["mpp"],
           "price": "0.04",
           "currency": "USDC.e",
           "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
@@ -124,7 +124,7 @@
         ],
         "x-payment-info": {
           "authMode": "paid",
-          "protocols": ["x402"],
+          "protocols": ["mpp"],
           "price": "0.01",
           "currency": "USDC.e",
           "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
@@ -160,7 +160,7 @@
         ],
         "x-payment-info": {
           "authMode": "paid",
-          "protocols": ["x402"],
+          "protocols": ["mpp"],
           "price": "0.02",
           "currency": "USDC.e",
           "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",
@@ -211,7 +211,7 @@
         ],
         "x-payment-info": {
           "authMode": "paid",
-          "protocols": ["x402"],
+          "protocols": ["mpp"],
           "price": "0.02",
           "currency": "USDC.e",
           "currencyAddress": "0x20C000000000000000000000b9537d11c60E8b50",

@@ -4,6 +4,7 @@ import { privateKeyToAccount } from "viem/accounts"
 const USDC_E = "0x20C000000000000000000000b9537d11c60E8b50" as const
 
 export const mppx = Mppx.create({
+  realm: process.env.MPP_REALM ?? "honeypot.ivan-tempo.xyz",
   methods: [
     tempo.charge({
       currency: USDC_E,
