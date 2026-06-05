@@ -11,7 +11,7 @@ export async function GET(request: Request): Promise<Response> {
   const address = url.searchParams.get("address")?.toLowerCase()
   const chainParam = url.searchParams.get("chain") || "1"
 
-  const result = await mppx.charge({ amount: PRICES.walletRisk })(request)
+  const result = await mppx.charge({ amount: "0.02" })(request)
   if (result.status === 402) return result.challenge
 
   if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
